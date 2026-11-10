@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('./partials/head') %>
+    <title><%= blog.title %></title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .blog-container {
+            max-width: 850px;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .author-section img {
+            object-fit: cover;
+            border: 2px solid #0d6efd;
+        }
+
+        .cover-image {
+            max-height: 450px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .blog-body {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #444;
+            background-color: #fdfdfd;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            padding: 20px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: inherit;
+        }
+
+        .comment-card {
+            background-color: #fdfdfd;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .comment-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .comment-avatar {
+            object-fit: cover;
+        }
+
+        .comment-form-container {
+            background: #f8f9fa;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('./partials/nav') %>
+
+    <div class="container my-5">
+        <div class="blog-container mx-auto">
+
+            <!-- Author Info -->
+            <div class="d-flex align-items-center justify-content-center mb-4 author-section">
+                <img src="<%= blog.createdBy?.profileImageURL || '/images/user.jpg' %>" width="50px" height="50px"
+                    class="rounded-circle me-2 shadow-sm" alt="Author Profile">
+                <span class="fw-bold fs-5 text-secondary">
+                    <%= blog.createdBy?.fullName || 'Anonymous' %>
+                </span>
+            </div>
+
+            <!-- Blog Title & Cover -->
+            <h1 class="fw-bold mb-4 text-center text-dark">
+                <%= blog.title %>
+            </h1>
+            <% if (blog.coverImageURL) { %>
+                <img src="<%= blog.coverImageURL %>" alt="Cover Image"
+                    class="img-fluid rounded cover-image shadow-sm mb-4">
+            <% } %>
+
+            <!-- Blog Body Content -->
+            <pre class="blog-body mb-5"><%= blog.body %></pre>
+
+            <hr class="my-5 text-muted">
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <h3 class="fw-bold mb-4">Comments <span class="text-muted fs-5">(<%= comments ? comments.length : 0 %>)</span></h3>
+
+                <!-- Show Comment Input Form ONLY if User is Logged In -->
+                <% if (locals.user) { %>
+                    <div class="comment-form-container mb-4">
+                        <form method="post" action="/blog/comment/<%= blog._id %>">
+                            <div class="mb-3">
+                                <label for="content" class="form-label fw-semibold text-muted">Add a comment</label>
+                                <textarea name="content" placeholder="Write your comment here..."
+                                    class="form-control" id="content" rows="3" required></textarea>
+                                <button class="btn btn-primary mt-3 px-4 fw-semibold" type="submit">Add</button>
+                            </div>
+                        </form>
+                    </div>
+                <% } else { %>
+                    <div class="alert alert-light border mb-4" role="alert">
+                        Please <a href="/user/signin" class="alert-link text-primary">Sign in</a> to add a comment.
+                    </div>
+                <% } %>
+
+                <!-- Render All Comments -->
+                <div class="mt-4">
+                    <% if (locals.comments && comments.length > 0) { %>
+                        <% comments.forEach(comment => { %>
+                            <div class="comment-card d-flex align-items-start mb-3 p-3">
+                                <img src="<%= comment.createdBy?.profileImageURL || '/images/user.jpg' %>" width="45px" height="45px"
+                                    class="rounded-circle comment-avatar me-3 shadow-sm" alt="User Profile">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="text-dark">
+                                            <%= comment.createdBy?.fullName || 'Anonymous' %>
+                                        </strong>
+                                    </div>
+                                    <p class="mb-0 text-secondary">
+                                        <%= comment.content %>
+                                    </p>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-muted fst-italic">No comments yet.</p>
+                    <% } %>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <%- include('./partials/script') %>
+</body>
+
+</html>
