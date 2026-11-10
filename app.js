@@ -12,10 +12,11 @@ const blogRoute = require('./routes/blog');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+const MONGO_URL = process.env.MONGO_URL || process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/blogify";
 
-mongoose.connect(process.env.MONGO_URL)
-.then(() => console.log('mongoDB Connected'))
-.catch(err => console.log('mongoDB connection error:', err));
+mongoose.connect(MONGO_URL)
+    .then(() => console.log('MongoDB Connected successfully'))
+    .catch(err => console.error('MongoDB connection error:', err.message));
 
 app.set("view engine", "ejs");
 app.set("views", path.resolve("./views"));
@@ -26,15 +27,34 @@ app.use(checkForAuthenticationCookie("token"));
 app.use(express.static(path.resolve("./public")));
 
 app.get("/", async (req, res) => {
-    const allBlogs = await Blog.find({});
+    try {
+        const allBlogs = await Blog.find({}).sort({ createdAt: -1 });
 
-    res.render("home", {
-        user: req.user,
-        blogs: allBlogs,
-    });
+        return res.render("home", {
+            user: req.user,
+            blogs: allBlogs,
+        });
+    } catch (error) {
+        console.error("Error fetching blogs:", error.message);
+        return res.render("home", {
+            user: req.user,
+            blogs: [],
+        });
+    }
 });
 
 app.use('/user', userRoute);
 app.use('/blog', blogRoute);
+
+// 404 Not Found fallback
+app.use((req, res) => {
+    return res.status(404).redirect('/');
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error("Internal Server Error:", err.message);
+    return res.status(500).redirect('/');
+});
 
 app.listen(PORT, () => console.log(`Server Started at PORT:${PORT}`));
