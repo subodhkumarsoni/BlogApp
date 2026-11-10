@@ -1,6 +1,11 @@
+
 const JWT = require('jsonwebtoken');
 
-const secret = process.env.JWT_SECRET || "$uperMan@123";
+const secret = process.env.JWT_SECRET;
+
+if (!secret) {
+    throw new Error('JWT_SECRET is missing in environment variables');
+}
 
 function createTokenForUser(user) {
     const payload = {
@@ -10,13 +15,12 @@ function createTokenForUser(user) {
         profileImageURL: user.profileImageURL,
         role: user.role,
     };
-    const token = JWT.sign(payload, secret);
-    return token;
+
+    return JWT.sign(payload, secret);
 }
 
 function validateToken(token) {
-    const payload = JWT.verify(token, secret);
-    return payload;
+    return JWT.verify(token, secret);
 }
 
 module.exports = {
