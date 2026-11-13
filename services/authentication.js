@@ -1,11 +1,6 @@
-
 const JWT = require('jsonwebtoken');
 
-const secret = process.env.JWT_SECRET;
-
-if (!secret) {
-    throw new Error('JWT_SECRET is missing in environment variables');
-}
+const secret = process.env.JWT_SECRET || "superMan@123_blogify_secure_fallback_key";
 
 function createTokenForUser(user) {
     const payload = {

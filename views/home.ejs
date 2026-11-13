@@ -3,34 +3,109 @@
 
 <head>
    <%- include('./partials/head') %>
-   <title>Homepage</title>
+   <title>Blogify - Explore Ideas, Tech, and Stories</title>
 </head>
 
 <body>
    <%- include('./partials/nav') %>
 
-   <div class="container mt-4">
-      <div class="row row-cols-1 row-cols-md-3 g-4">
-         <% blogs.forEach(blog => { %>
-            <div class="col">
-               <div class="card h-100 shadow-sm">
-                  <% if (blog.coverImageURL) { %>
-                     <img src="<%= blog.coverImageURL %>" class="card-img-top" alt="Blog Cover" style="height: 200px; object-fit: cover;">
-                  <% } %>
-                  <div class="card-body d-flex flex-column">
-                     <h5 class="card-title">
-                        <%= blog.title %>
-                     </h5>
-                     <a href="/blog/<%= blog._id %>" class="btn btn-primary mt-auto">
-                        View Blog
-                     </a>
-                  </div>
-               </div>
-            </div>
-         <% }) %>
+   <!-- Hero Banner -->
+   <section class="hero-section">
+      <div class="container">
+         <div class="hero-badge">
+            <i class="bi bi-stars"></i> Curated Tech &amp; Architecture Stories
+         </div>
+         <h1 class="hero-title">
+            Where Big Ideas Find Their <span class="gradient-text">Voice</span>.
+         </h1>
+         <p class="hero-subtitle">
+            Deep-dive into frontend engineering, scalable backend architecture, and modern web development written by real engineers.
+         </p>
+         <div class="d-flex justify-content-center gap-3">
+            <a href="/blog/add-new" class="btn-primary-gradient">
+               <i class="bi bi-pencil-square"></i> Start Writing
+            </a>
+            <% if (!locals.user) { %>
+               <a href="/user/signup" class="btn btn-outline-secondary rounded-3 px-4 py-2 fw-semibold">
+                  Join Community
+               </a>
+            <% } %>
+         </div>
       </div>
-   </div>
+   </section>
 
+   <!-- Articles Section -->
+   <main class="container my-5">
+      <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+         <div>
+            <h2 class="fw-bold mb-1 fs-3">Featured Stories</h2>
+            <p class="text-muted small mb-0">Discover the latest architectural guides and articles</p>
+         </div>
+         <span class="badge bg-light text-primary border px-3 py-2 rounded-pill fw-semibold">
+            <%= blogs.length %> <%= blogs.length === 1 ? 'Article' : 'Articles' %>
+         </span>
+      </div>
+
+      <% if (blogs && blogs.length > 0) { %>
+         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <% blogs.forEach(blog => { %>
+               <div class="col">
+                  <article class="blog-card">
+                     <a href="/blog/<%= blog._id %>" class="blog-card-img-wrapper text-decoration-none">
+                        <% if (blog.coverImageURL) { %>
+                           <img src="<%= blog.coverImageURL %>" class="blog-card-img" alt="<%= blog.title %>" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=800&q=80';">
+                        <% } else { %>
+                           <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=800&q=80" class="blog-card-img" alt="<%= blog.title %>">
+                        <% } %>
+                     </a>
+
+                     <div class="blog-card-body">
+                        <a href="/blog/<%= blog._id %>" class="text-decoration-none">
+                           <h3 class="blog-card-title"><%= blog.title %></h3>
+                        </a>
+
+                        <p class="blog-card-excerpt">
+                           <%= (blog.body || '').replace(/[\r\n]+/g, ' ').substring(0, 120) %>...
+                        </p>
+
+                        <!-- Author Profile Info -->
+                        <div class="blog-card-author">
+                           <img src="<%= blog.createdBy?.profileImageURL || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(blog.createdBy?.fullName || 'Author') + '&background=4f46e5&color=fff&bold=true') %>" 
+                                class="author-avatar-sm" 
+                                alt="<%= blog.createdBy?.fullName || 'Author' %>"
+                                onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Author&background=4f46e5&color=fff&bold=true';">
+                           <div class="flex-grow-1 min-w-0">
+                              <div class="author-meta-name text-truncate">
+                                 <%= blog.createdBy?.fullName || 'Anonymous Author' %>
+                              </div>
+                              <div class="author-meta-date">
+                                 <i class="bi bi-clock me-1"></i>
+                                 <%= new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                              </div>
+                           </div>
+                        </div>
+
+                        <a href="/blog/<%= blog._id %>" class="btn btn-outline-primary btn-sm rounded-pill mt-3 w-100 fw-semibold">
+                           Read Article <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                     </div>
+                  </article>
+               </div>
+            <% }) %>
+         </div>
+      <% } else { %>
+         <div class="text-center py-5 my-5 bg-white rounded-4 border p-5">
+            <i class="bi bi-journal-x text-muted" style="font-size: 3.5rem;"></i>
+            <h4 class="fw-bold mt-3">No Blogs Published Yet</h4>
+            <p class="text-muted mb-4">Be the pioneer! Share your insights with the developer community.</p>
+            <a href="/blog/add-new" class="btn-primary-gradient">
+               <i class="bi bi-plus-circle me-1"></i> Create First Blog
+            </a>
+         </div>
+      <% } %>
+   </main>
+
+   <%- include('./partials/footer') %>
    <%- include('./partials/script') %>
 </body>
 

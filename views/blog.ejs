@@ -3,149 +3,153 @@
 
 <head>
     <%- include('./partials/head') %>
-    <title><%= blog.title %></title>
-    <style>
-        body {
-            background-color: #f8f9fa;
-            color: #333;
-        }
-
-        .blog-container {
-            max-width: 850px;
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            position: relative;
-        }
-
-        .author-section img {
-            object-fit: cover;
-            border: 2px solid #0d6efd;
-        }
-
-        .cover-image {
-            max-height: 450px;
-            object-fit: cover;
-            width: 100%;
-        }
-
-        .blog-body {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #444;
-            background-color: #fdfdfd;
-            border: 1px solid #eaeaea;
-            border-radius: 8px;
-            padding: 20px;
-            white-space: pre-wrap;
-            word-break: break-word;
-            font-family: inherit;
-        }
-
-        .comment-card {
-            background-color: #fdfdfd;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .comment-card:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-
-        .comment-avatar {
-            object-fit: cover;
-        }
-
-        .comment-form-container {
-            background: #f8f9fa;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 20px;
-        }
-    </style>
+    <title><%= blog.title %> - Blogify</title>
 </head>
 
 <body>
     <%- include('./partials/nav') %>
 
-    <div class="container my-5">
-        <div class="blog-container mx-auto">
+    <main class="container my-4">
+        <div class="article-container">
+            <!-- Back Link -->
+            <a href="/" class="btn btn-sm btn-outline-secondary rounded-pill mb-4 px-3 d-inline-flex align-items-center gap-1">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to Stories</span>
+            </a>
 
-            <!-- Author Info -->
-            <div class="d-flex align-items-center justify-content-center mb-4 author-section">
-                <img src="<%= blog.createdBy?.profileImageURL || '/images/user.jpg' %>" width="50px" height="50px"
-                    class="rounded-circle me-2 shadow-sm" alt="Author Profile">
-                <span class="fw-bold fs-5 text-secondary">
-                    <%= blog.createdBy?.fullName || 'Anonymous' %>
-                </span>
-            </div>
+            <!-- Article Header -->
+            <header class="article-header text-start">
+                <h1 class="article-title"><%= blog.title %></h1>
 
-            <!-- Blog Title & Cover -->
-            <h1 class="fw-bold mb-4 text-center text-dark">
-                <%= blog.title %>
-            </h1>
+                <!-- Author Profile Card -->
+                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-4 border">
+                    <img src="<%= blog.createdBy?.profileImageURL || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(blog.createdBy?.fullName || 'Author') + '&background=4f46e5&color=fff&bold=true') %>" 
+                         width="52" 
+                         height="52"
+                         class="rounded-circle shadow-sm" 
+                         style="object-fit: cover; border: 2px solid #4f46e5;"
+                         alt="<%= blog.createdBy?.fullName || 'Author' %>"
+                         onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Author&background=4f46e5&color=fff&bold=true';">
+                    
+                    <div class="flex-grow-1">
+                        <div class="fw-bold text-dark fs-6">
+                            <%= blog.createdBy?.fullName || 'Anonymous Author' %>
+                        </div>
+                        <div class="text-muted small d-flex flex-wrap align-items-center gap-2">
+                            <span><i class="bi bi-calendar3 me-1"></i><%= new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></span>
+                            <span>&bull;</span>
+                            <span><i class="bi bi-book me-1"></i><%= Math.max(1, Math.ceil((blog.body || '').split(/\s+/).length / 200)) %> min read</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Featured Cover Image -->
             <% if (blog.coverImageURL) { %>
-                <img src="<%= blog.coverImageURL %>" alt="Cover Image"
-                    class="img-fluid rounded cover-image shadow-sm mb-4">
+                <div class="text-center">
+                    <img src="<%= blog.coverImageURL %>" 
+                         alt="<%= blog.title %>"
+                         class="article-cover-img"
+                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=1200&q=80';">
+                </div>
             <% } %>
 
-            <!-- Blog Body Content -->
-            <pre class="blog-body mb-5"><%= blog.body %></pre>
-
-            <hr class="my-5 text-muted">
+            <!-- Article Body Content -->
+            <div class="article-body">
+                <%= blog.body %>
+            </div>
 
             <!-- Comments Section -->
-            <div class="comments-section">
-                <h3 class="fw-bold mb-4">Comments <span class="text-muted fs-5">(<%= comments ? comments.length : 0 %>)</span></h3>
+            <section class="comments-container">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h3 class="fw-bold fs-4 mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-chat-dots-fill text-primary"></i>
+                        <span>Responses</span>
+                    </h3>
+                    <span class="badge bg-primary rounded-pill px-3 py-2">
+                        <%= comments ? comments.length : 0 %>
+                    </span>
+                </div>
 
-                <!-- Show Comment Input Form ONLY if User is Logged In -->
+                <!-- Add Comment Form for Logged In User -->
                 <% if (locals.user) { %>
-                    <div class="comment-form-container mb-4">
+                    <div class="comment-box-card">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <img src="<%= locals.user.profileImageURL || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(locals.user.fullName || 'User') + '&background=4f46e5&color=fff&bold=true') %>" 
+                                 width="34" 
+                                 height="34" 
+                                 class="rounded-circle"
+                                 alt="<%= locals.user.fullName %>">
+                            <span class="fw-semibold small">Commenting as <strong class="text-primary"><%= locals.user.fullName %></strong></span>
+                        </div>
                         <form method="post" action="/blog/comment/<%= blog._id %>">
                             <div class="mb-3">
-                                <label for="content" class="form-label fw-semibold text-muted">Add a comment</label>
-                                <textarea name="content" placeholder="Write your comment here..."
-                                    class="form-control" id="content" rows="3" required></textarea>
-                                <button class="btn btn-primary mt-3 px-4 fw-semibold" type="submit">Add</button>
+                                <textarea name="content" 
+                                          placeholder="Share your thoughts or feedback on this article..."
+                                          class="form-control form-control-custom" 
+                                          id="content" 
+                                          rows="3" 
+                                          required></textarea>
+                            </div>
+                            <div class="text-end">
+                                <button class="btn btn-primary-gradient px-4" type="submit">
+                                    <i class="bi bi-send-fill me-1"></i> Add
+                                </button>
                             </div>
                         </form>
                     </div>
                 <% } else { %>
-                    <div class="alert alert-light border mb-4" role="alert">
-                        Please <a href="/user/signin" class="alert-link text-primary">Sign in</a> to add a comment.
+                    <div class="alert alert-light border rounded-4 p-4 text-center mb-4">
+                        <i class="bi bi-lock-fill text-muted fs-3 mb-2 d-block"></i>
+                        <h5 class="fw-bold mb-1">Want to join the conversation?</h5>
+                        <p class="text-muted small mb-3">Sign in or create a free account to leave your thoughts.</p>
+                        <a href="/user/signin" class="btn btn-outline-primary rounded-pill px-4 btn-sm me-2 fw-semibold">Sign In</a>
+                        <a href="/user/signup" class="btn-primary-gradient py-1 px-3 btn-sm">Get Started</a>
                     </div>
                 <% } %>
 
-                <!-- Render All Comments -->
-                <div class="mt-4">
+                <!-- Comments List -->
+                <div class="comments-list mt-3">
                     <% if (locals.comments && comments.length > 0) { %>
                         <% comments.forEach(comment => { %>
-                            <div class="comment-card d-flex align-items-start mb-3 p-3">
-                                <img src="<%= comment.createdBy?.profileImageURL || '/images/user.jpg' %>" width="45px" height="45px"
-                                    class="rounded-circle comment-avatar me-3 shadow-sm" alt="User Profile">
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <strong class="text-dark">
-                                            <%= comment.createdBy?.fullName || 'Anonymous' %>
-                                        </strong>
+                            <div class="comment-bubble">
+                                <div class="d-flex align-items-start gap-3">
+                                    <img src="<%= comment.createdBy?.profileImageURL || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(comment.createdBy?.fullName || 'User') + '&background=4f46e5&color=fff&bold=true') %>" 
+                                         width="42" 
+                                         height="42"
+                                         class="rounded-circle shadow-sm"
+                                         style="object-fit: cover;"
+                                         alt="<%= comment.createdBy?.fullName || 'User' %>"
+                                         onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff&bold=true';">
+                                    
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <strong class="text-dark fs-6">
+                                                <%= comment.createdBy?.fullName || 'Community Member' %>
+                                            </strong>
+                                            <span class="text-muted small">
+                                                <%= new Date(comment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %>
+                                            </span>
+                                        </div>
+                                        <p class="mb-0 text-secondary" style="font-size: 0.95rem; line-height: 1.6;">
+                                            <%= comment.content %>
+                                        </p>
                                     </div>
-                                    <p class="mb-0 text-secondary">
-                                        <%= comment.content %>
-                                    </p>
                                 </div>
                             </div>
                         <% }) %>
                     <% } else { %>
-                        <p class="text-muted fst-italic">No comments yet.</p>
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-chat-square-dots fs-3 d-block mb-1"></i>
+                            <p class="small mb-0">No comments yet. Be the first to share your perspective!</p>
+                        </div>
                     <% } %>
                 </div>
-            </div>
-
+            </section>
         </div>
-    </div>
+    </main>
 
+    <%- include('./partials/footer') %>
     <%- include('./partials/script') %>
 </body>
 

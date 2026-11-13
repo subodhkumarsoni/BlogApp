@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('./partials/head') %>
+    <title>My Profile - Blogify</title>
+</head>
+
+<body>
+    <%- include('./partials/nav') %>
+
+    <main class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Profile Header Card -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-4">
+                    <div class="d-flex flex-column flex-md-row align-items-center gap-4 mb-4 pb-4 border-bottom">
+                        <img src="<%= user.profileImageURL || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(user.fullName || 'User') + '&background=4f46e5&color=fff&bold=true') %>" 
+                             class="rounded-circle shadow" 
+                             width="90" 
+                             height="90" 
+                             style="object-fit: cover; border: 3px solid #4f46e5;"
+                             alt="<%= user.fullName %>"
+                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff&bold=true';">
+                        
+                        <div class="text-center text-md-start">
+                            <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-1 rounded-pill mb-2">Author Profile</span>
+                            <h2 class="fw-bold mb-1"><%= user.fullName %></h2>
+                            <p class="text-muted small mb-0"><i class="bi bi-envelope me-1"></i><%= user.email %></p>
+                        </div>
+                    </div>
+
+                    <!-- Update Profile Picture Form -->
+                    <h5 class="fw-bold mb-3"><i class="bi bi-camera me-2 text-primary"></i>Update Profile Picture</h5>
+                    
+                    <% if (locals.message) { %>
+                        <div class="alert alert-success py-2 small mb-3" role="alert">
+                            <i class="bi bi-check-circle-fill me-1"></i><%= locals.message %>
+                        </div>
+                    <% } %>
+
+                    <form action="/user/profile" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="profileImage" class="form-label small fw-semibold">Choose New Photo</label>
+                            <input type="file" name="profileImage" id="profileImage" class="form-control form-control-custom" accept="image/*" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary-gradient btn-sm px-4">
+                            <i class="bi bi-upload"></i> Upload &amp; Save
+                        </button>
+                    </form>
+                </div>
+
+                <!-- User's Authored Articles -->
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h4 class="fw-bold fs-5 mb-0"><i class="bi bi-journal-text me-2 text-primary"></i>Your Published Stories</h4>
+                    <span class="badge bg-light text-dark border px-3 py-1 rounded-pill"><%= userBlogs ? userBlogs.length : 0 %> Stories</span>
+                </div>
+
+                <% if (locals.userBlogs && userBlogs.length > 0) { %>
+                    <div class="list-group shadow-sm rounded-4 border-0 mb-4">
+                        <% userBlogs.forEach(b => { %>
+                            <div class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-3 border-bottom">
+                                <div class="d-flex align-items-center gap-3">
+                                    <% if (b.coverImageURL) { %>
+                                        <img src="<%= b.coverImageURL %>" width="60" height="45" class="rounded object-fit-cover" alt="<%= b.title %>" onerror="this.src='https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=200&q=80';">
+                                    <% } %>
+                                    <div>
+                                        <a href="/blog/<%= b._id %>" class="fw-bold text-dark text-decoration-none d-block"><%= b.title %></a>
+                                        <span class="text-muted small"><i class="bi bi-calendar3 me-1"></i><%= new Date(b.createdAt).toLocaleDateString() %></span>
+                                    </div>
+                                </div>
+                                <a href="/blog/<%= b._id %>" class="btn btn-sm btn-outline-primary rounded-pill px-3">View</a>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+                        <p class="text-muted mb-3">You haven't published any articles yet.</p>
+                        <div>
+                            <a href="/blog/add-new" class="btn-primary-gradient btn-sm px-3">
+                                <i class="bi bi-plus-circle me-1"></i> Write Your First Story
+                            </a>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+
+    <%- include('./partials/footer') %>
+    <%- include('./partials/script') %>
+</body>
+
+</html>
